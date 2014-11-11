@@ -2,6 +2,10 @@
 
 > This is a simple RubyMine/IntelliJ plugin to allow using RuboCop as a linter in your ruby projects.
 
+## Screenshot
+
+![Screenshot](https://dl.dropboxusercontent.com/u/9984109/images/rubocop-for-rubymine/screenshot.png)
+
 ## State of Development
 
 I'm not working on this project. This is more of a proof-of-concept and *works for me*(tm).
