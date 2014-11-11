@@ -1,6 +1,14 @@
 # RuboCop for RubyMine
 
-> This is a simple RubyMine/IntelliJ plugin to allow using RuboCop as a linter in your ruby projects.
+> This is a simple RubyMine/IDEA plugin to allow using RuboCop as a linter in your ruby projects.
+
+## Installation
+
+- Download the [.zip](https://github.com/sirlantis/rubocop-for-rubymine/releases)
+- Got to the Plugins-Settings in your IDE (IDEA/RubyMine).
+- Click "Install plugins from disk..."
+- Select the ZIP
+- Restart the IDE
 
 ## Screenshot
 
