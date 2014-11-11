@@ -1,0 +1,65 @@
+package io.github.sirlantis.rubymine.rubocop.model
+
+import com.intellij.openapi.vfs.VirtualFile
+import java.io.InputStreamReader
+import com.google.gson.stream.JsonReader
+import java.io.FileReader
+import java.util.LinkedList
+
+class RubocopResult(val fileResults: List<FileResult>): List<FileResult> by fileResults {
+
+    class object {
+        fun readFromFile(file: VirtualFile): RubocopResult {
+            return readFromReader(FileReader(file.getPath()))
+        }
+
+        fun readFromReader(reader: InputStreamReader): RubocopResult {
+            return readFromJsonReader(JsonReader(reader))
+        }
+
+        fun readFromJsonReader(reader: JsonReader): RubocopResult {
+            // var timestamp = null
+            val fileResults = LinkedList<FileResult>()
+            reader.beginObject()
+
+            while (reader.hasNext()) {
+                val attrName = reader.nextName()
+
+                if (attrName == "files") {
+                    reader.beginArray()
+                    fileResults.add(FileResult.readFromJsonReader(reader))
+                    reader.endArray()
+                } else {
+                    reader.skipValue()
+                }
+            }
+
+            reader.endObject()
+            return RubocopResult(fileResults)
+        }
+
+        fun merge(a:RubocopResult?, b:RubocopResult?): RubocopResult? {
+            if (a == null || b == null) {
+                return a ?: b
+            }
+
+            return b
+
+//            val merged = HashMap<String, VirtualFile>()
+//
+//            for ((key, file) in a) {
+//                merged.put(key, file);
+//            }
+//
+//            for ((key, file) in b) {
+//                merged.put(key, file);
+//            }
+//
+//            return RubocopResult(merged)
+        }
+    }
+
+    fun getFileResult(filePath: String): FileResult? {
+        return fileResults firstOrNull { it.path == filePath }
+    }
+}

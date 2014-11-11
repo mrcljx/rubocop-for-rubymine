@@ -1,0 +1,41 @@
+<idea-plugin version="2">
+    <id>io.github.sirlantis.rubymine.rubocop</id>
+    <name>RubcopPlugin</name>
+    <version>0.0.1</version>
+    <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
+
+    <description><![CDATA[
+      The plugin displays the errors from Rubocop within the gutter.
+    ]]></description>
+
+    <change-notes>
+    </change-notes>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="131"/>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+         on how to target different products -->
+
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileDocumentManagerListener implementation="io.github.sirlantis.rubymine.rubocop.RubocopSaveListener"/>
+    </extensions>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+        <component>
+            <implementation-class>io.github.sirlantis.rubymine.rubocop.RubocopPlugin</implementation-class>
+        </component>
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>

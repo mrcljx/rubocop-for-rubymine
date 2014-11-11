@@ -1,0 +1,9 @@
+# IDEA project files with local data
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+
+# Java/Kotlin intermediate files
+/out
+
+# Bundled plugin
+*.zip
