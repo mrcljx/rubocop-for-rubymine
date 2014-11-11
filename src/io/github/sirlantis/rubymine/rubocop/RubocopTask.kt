@@ -114,44 +114,6 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         parseProcessOutput { commandLine.createProcess() }
     }
 
-    fun runViaProcessBuilder(indicator: ProgressIndicator) {
-        val builder = ProcessBuilder()
-
-        val env = builder.environment()
-        var envPath = env.getOrElse("PATH") { "" }
-        envPath += ":" + sdkRoot
-        env.put("PATH", envPath)
-
-        var usesBundler = false
-        val app = ApplicationManager.getApplication()
-
-        app.runReadAction {
-            val roots = ModuleRootManager.getInstance(module).getContentRoots()
-            val root = File(roots.first().getCanonicalPath())
-            builder.directory(root)
-            usesBundler = roots.any { it.findChild("Gemfile") != null }
-        }
-
-        val command = LinkedList<String>()
-
-        if (usesBundler) {
-            command.add(File(sdkRoot, "bundle").canonicalPath)
-            command.add("exec")
-        }
-
-        command.add("rubocop")
-        command.add("--format")
-        command.add("json")
-        command.addAll(paths)
-
-        builder.command(command)
-
-        logger.debug("Environment for RuboCop", env)
-        logger.debug("Executing RuboCop", builder.command())
-
-        parseProcessOutput { builder.start() }
-    }
-
     fun tryClose(closable: Closeable?) {
         if (closable != null) {
             try {
