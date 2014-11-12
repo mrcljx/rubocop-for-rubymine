@@ -12,7 +12,7 @@
 
 ## Screenshot
 
-![Screenshot](https://dl.dropboxusercontent.com/u/9984109/images/rubocop-for-rubymine/screenshot.png)
+![screenshot](https://cloud.githubusercontent.com/assets/56807/5009481/9bbee3b4-6a67-11e4-8bf9-2a32c3bc3d5e.png)
 
 ## State of Development
 
