@@ -1,11 +1,11 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
     <name>RubcopPlugin</name>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
-      The plugin displays the errors from Rubocop within the gutter.
+      The plugin displays the errors from RuboCop as annotations.
     ]]></description>
 
     <change-notes>
@@ -20,7 +20,12 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileDocumentManagerListener implementation="io.github.sirlantis.rubymine.rubocop.RubocopSaveListener"/>
+        <externalAnnotator language="ruby" implementationClass="io.github.sirlantis.rubymine.rubocop.RubocopAnnotator" />
+        <localInspection language="ruby" groupPath="Ruby" shortName="RubocopInspection"
+                         enabledByDefault="true" level="ERROR"
+                         bundle="io.github.sirlantis.rubymine.rubocop.RubocopBundle"
+                         implementationClass="io.github.sirlantis.rubymine.rubocop.RubocopInspection"
+                         displayName="Rubocop" groupKey="rubcop.inspection.group.name"/>
     </extensions>
 
     <application-components>
@@ -29,9 +34,6 @@
 
     <project-components>
         <!-- Add your project components here -->
-        <component>
-            <implementation-class>io.github.sirlantis.rubymine.rubocop.RubocopPlugin</implementation-class>
-        </component>
     </project-components>
 
     <actions>

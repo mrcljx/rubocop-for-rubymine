@@ -2,7 +2,7 @@ package io.github.sirlantis.rubymine.rubocop.model
 
 import com.google.gson.stream.JsonReader
 
-class OffenseLocation(val line: Number, val column: Number, val length: Number) {
+class OffenseLocation(val line: Int, val column: Int, val length: Int) {
     class object {
         fun zero(): OffenseLocation {
             return OffenseLocation(0, 0, 0)

@@ -37,6 +37,10 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         }
 
     override fun run(indicator: ProgressIndicator) {
+        run()
+    }
+
+    fun run() {
         if (!isRubySdk(sdk)) {
             logger.warn("Not a Ruby SDK")
             return
@@ -127,7 +131,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
     var onComplete: ((RubocopTask) -> Unit)? = null
 
     class object {
-        val logger = Logger.getInstance(javaClass<RubocopTask>())
+        val logger = Logger.getInstance(RubocopBundle.LOG_ID)
 
         fun isRubySdk(sdk: Sdk): Boolean {
             return sdk.getSdkType().getName() == "RUBY_SDK"
