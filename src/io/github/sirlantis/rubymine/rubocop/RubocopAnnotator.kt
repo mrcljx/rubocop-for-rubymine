@@ -66,8 +66,7 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     }
 
     fun isRubyFile(file: PsiFile): Boolean {
-        // file.getFileType().equals("Ruby");
-        return true
+        return file.getFileType().getName() == "Ruby"
     }
 
     override fun apply(file: PsiFile, annotationResult: Result?, holder: AnnotationHolder) {
