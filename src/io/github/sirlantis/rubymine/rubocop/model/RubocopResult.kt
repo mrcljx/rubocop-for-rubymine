@@ -37,26 +37,6 @@ class RubocopResult(val fileResults: List<FileResult>): List<FileResult> by file
             reader.endObject()
             return RubocopResult(fileResults)
         }
-
-        fun merge(a:RubocopResult?, b:RubocopResult?): RubocopResult? {
-            if (a == null || b == null) {
-                return a ?: b
-            }
-
-            return b
-
-//            val merged = HashMap<String, VirtualFile>()
-//
-//            for ((key, file) in a) {
-//                merged.put(key, file);
-//            }
-//
-//            for ((key, file) in b) {
-//                merged.put(key, file);
-//            }
-//
-//            return RubocopResult(merged)
-        }
     }
 
     fun getFileResult(filePath: String): FileResult? {
