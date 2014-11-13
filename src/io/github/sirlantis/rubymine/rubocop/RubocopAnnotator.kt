@@ -15,7 +15,6 @@ import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.openapi.editor.Document
 import io.github.sirlantis.rubymine.rubocop.model.Offense
 import com.intellij.openapi.util.text.StringUtil
-import com.wix.utils.PsiUtil
 import com.intellij.openapi.util.TextRange
 import kotlin.properties.Delegates
 import com.intellij.openapi.editor.Editor
