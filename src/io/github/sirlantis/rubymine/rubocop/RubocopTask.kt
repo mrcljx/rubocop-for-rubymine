@@ -22,6 +22,8 @@ import kotlin.modules.module
 import java.io.Closeable
 import java.io.BufferedInputStream
 import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.openapi.application.Application
+import kotlin.properties.Delegates
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.getProject(), "Running RuboCop", true) {
     var result: RubocopResult? = null
@@ -98,24 +100,55 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
     fun runViaCommandLine() {
         val commandLine = GeneralCommandLine()
-        commandLine.setExePath(File(sdkRoot, "rubocop").canonicalPath)
+        commandLine.setWorkDirectory(workDirectory.getCanonicalPath())
 
-        val app = ApplicationManager.getApplication()
+        val parts = LinkedList<String>()
 
-        app.runReadAction {
-            val roots = ModuleRootManager.getInstance(module).getContentRoots()
-            val root = File(roots.first().getCanonicalPath())
-            commandLine.setWorkDirectory(root)
-            commandLine.setExePath(File(sdkRoot, "bundle").canonicalPath)
-            commandLine.addParameters("exec", "rubocop")
+        if (usesRubyVersionManager) {
+            val home = System.getProperty("user.home")
+            val rvmCommand = File(File(File(home, ".rvm"), "bin"), "rvm")
+            parts.addAll(array(rvmCommand.canonicalPath, ".", "do"))
         }
 
-        commandLine.addParameters("--format", "json")
-        commandLine.addParameters(paths)
+        if (usesBundler) {
+            parts.addAll(array("bundle", "exec"))
+        }
+
+        parts.addAll(array("rubocop", "--format", "json"))
+        parts.addAll(paths)
+
+        val command = parts.removeFirst()
+        commandLine.setExePath(command)
+        commandLine.addParameters(parts)
 
         logger.debug("Executing RuboCop", commandLine.getCommandLineString())
 
         parseProcessOutput { commandLine.createProcess() }
+    }
+
+    val app: Application by Delegates.lazy {
+        ApplicationManager.getApplication()
+    }
+
+    val workDirectory: VirtualFile by Delegates.lazy {
+        var file: VirtualFile? = null
+
+        app.runReadAction {
+            val roots = ModuleRootManager.getInstance(module).getContentRoots()
+            file = roots.first()
+        }
+
+        file as VirtualFile
+    }
+
+    val usesBundler: Boolean by Delegates.lazy {
+        // TODO: better check possible?
+        workDirectory.findChild("Gemfile") != null
+    }
+
+    val usesRubyVersionManager: Boolean by Delegates.lazy {
+        // TODO: better check possible?
+        sdk.getHomePath().contains("rvm")
     }
 
     fun tryClose(closable: Closeable?) {
