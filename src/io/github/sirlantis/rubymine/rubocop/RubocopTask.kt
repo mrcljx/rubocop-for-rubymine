@@ -109,7 +109,8 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
         val parts = LinkedList<String>()
 
-        if (usesRubyVersionManager) {
+        // prefer rbenv over RVM
+        if (usesRubyVersionManager && !usesRbenv) {
             val home = System.getProperty("user.home")
             val rvmCommand = File(File(File(home, ".rvm"), "bin"), "rvm")
             parts.addAll(array(rvmCommand.canonicalPath, ".", "do"))
@@ -122,7 +123,14 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         parts.addAll(array("rubocop", "--format", "json"))
         parts.addAll(paths)
 
-        val command = parts.removeFirst()
+        var command = parts.removeFirst()
+
+        if (usesRbenv) {
+            val versionFolder = File(sdk.getHomePath()).getParentFile().getParentFile()
+            val rbenvRoot = versionFolder.getParentFile().getParentFile()
+            command = File(File(rbenvRoot, "shims"), command).canonicalPath
+        }
+
         commandLine.setExePath(command)
         commandLine.addParameters(parts)
 
@@ -151,6 +159,11 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             // TODO: better check possible?
             return workDirectory.findChild("Gemfile") != null
         }
+
+    val usesRbenv: Boolean by Delegates.lazy {
+        // TODO: better check possible?
+        sdk.getHomePath().contains("rbenv")
+    }
 
     val usesRubyVersionManager: Boolean by Delegates.lazy {
         // TODO: better check possible?
