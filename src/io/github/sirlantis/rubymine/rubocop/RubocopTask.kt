@@ -146,10 +146,11 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         file as VirtualFile
     }
 
-    val usesBundler: Boolean by Delegates.lazy {
-        // TODO: better check possible?
-        workDirectory.findChild("Gemfile") != null
-    }
+    val usesBundler: Boolean
+        get() {
+            // TODO: better check possible?
+            return workDirectory.findChild("Gemfile") != null
+        }
 
     val usesRubyVersionManager: Boolean by Delegates.lazy {
         // TODO: better check possible?
