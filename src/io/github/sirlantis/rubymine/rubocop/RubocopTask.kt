@@ -48,6 +48,11 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             return
         }
 
+        if (!hasRubocopConfig) {
+            logger.warn("Didn't find $RUBOCOP_CONFIG_FILENAME")
+            return
+        }
+
         runViaCommandLine()
     }
 
@@ -150,6 +155,13 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         // TODO: better check possible?
         sdk.getHomePath().contains("rvm")
     }
+
+    val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml";
+
+    val hasRubocopConfig: Boolean
+        get() {
+            return workDirectory.findChild(RUBOCOP_CONFIG_FILENAME) != null
+        }
 
     fun tryClose(closable: Closeable?) {
         if (closable != null) {
