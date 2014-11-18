@@ -1,17 +1,18 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
     <name>RubcopPlugin</name>
-    <version>1.0.0</version>
+    <version>1.0.1.rc1</version>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
-      The plugin displays the errors from RuboCop as annotations.
+        The plugin displays the errors from RuboCop as annotations.
     ]]></description>
 
     <change-notes><![CDATA[
-       <p>1.0.0 Fix compatibility issues with RVM.</p>
-       <p>0.0.2 Real annotator instead of annotations in gutter.</p>
-       <p>0.0.1 First version.</p>
+        <p>1.0.1 Fix compatibility issues with rbenv.</p>
+        <p>1.0.0 Fix compatibility issues with RVM.</p>
+        <p>0.0.2 Real annotator instead of annotations in gutter.</p>
+        <p>0.0.1 First version.</p>
     ]]></change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
