@@ -126,9 +126,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         var command = parts.removeFirst()
 
         if (usesRbenv) {
-            val versionFolder = File(sdk.getHomePath()).getParentFile().getParentFile()
-            val rbenvRoot = versionFolder.getParentFile().getParentFile()
-            command = File(File(rbenvRoot, "shims"), command).canonicalPath
+            command = File(rbenvShimsFolder, command).canonicalPath
         }
 
         commandLine.setExePath(command)
@@ -163,6 +161,16 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
     val usesRbenv: Boolean by Delegates.lazy {
         // TODO: better check possible?
         sdk.getHomePath().contains("rbenv")
+    }
+
+    val rbenvRoot: File by Delegates.lazy {
+        // TODO: prefer value from Settings panel
+        val versionFolder = File(sdk.getHomePath()).getParentFile().getParentFile()
+        versionFolder.getParentFile().getParentFile()
+    }
+
+    val rbenvShimsFolder: File by Delegates.lazy {
+        File(rbenvRoot, "shims")
     }
 
     val usesRubyVersionManager: Boolean by Delegates.lazy {
