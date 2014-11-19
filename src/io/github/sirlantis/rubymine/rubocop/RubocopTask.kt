@@ -78,13 +78,10 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             logger.error("Failed to parse RuboCop output.", e)
 
             logger.error("ERROR", InputStreamReader(stderrStream).readText())
-            tryClose(stderrStream)
 
+            // reset stdout so we can print it again
             stdoutStream.reset()
             logger.error("OUTPUT", InputStreamReader(stdoutStream).readText())
-            tryClose(stdoutStream)
-
-            return
         }
 
         try {
@@ -100,7 +97,9 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         tryClose(stdoutStream)
         tryClose(stderrStream)
 
-        onComplete?.invoke(this)
+        if (result != null) {
+            onComplete?.invoke(this)
+        }
     }
 
     fun runViaCommandLine() {
