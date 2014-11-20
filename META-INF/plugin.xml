@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
-    <version>1.0.1.rc1</version>
     <name>RuboCop</name>
+    <version>2.0.0.rc1</version>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
@@ -9,6 +9,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>2.0.0 Depend on Ruby plugin for CommandLine execution.</p>
         <p>1.0.1 Fix compatibility issues with rbenv.</p>
         <p>1.0.0 Fix compatibility issues with RVM.</p>
         <p>0.0.2 Real annotator instead of annotations in gutter.</p>
