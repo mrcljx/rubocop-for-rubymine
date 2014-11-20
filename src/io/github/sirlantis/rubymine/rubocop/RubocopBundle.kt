@@ -8,8 +8,8 @@ import java.lang.ref.SoftReference
 
 class RubocopBundle {
     class object {
-        val BUNDLE: String = "io.github.sirlantis.rubymine.RubocopBundle"
-        val LOG_ID: String = "io.github.sirlantis.rubymine"
+        val BUNDLE: String = "io.github.sirlantis.rubymine.rubocop.RubocopBundle"
+        val LOG_ID: String = "io.github.sirlantis.rubymine.rubocop"
 
         fun message(key: String, vararg params: Any?): String {
             return CommonBundle.message(instance, key, *params)
