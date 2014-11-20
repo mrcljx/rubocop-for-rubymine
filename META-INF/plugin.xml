@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
-    <name>RubcopPlugin</name>
     <version>1.0.1.rc1</version>
+    <name>RuboCop</name>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
