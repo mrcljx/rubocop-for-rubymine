@@ -27,7 +27,11 @@ class RubocopResult(val fileResults: List<FileResult>): List<FileResult> by file
 
                 if (attrName == "files") {
                     reader.beginArray()
-                    fileResults.add(FileResult.readFromJsonReader(reader))
+
+                    while (reader.hasNext()) {
+                        fileResults.add(FileResult.readFromJsonReader(reader))
+                    }
+
                     reader.endArray()
                 } else {
                     reader.skipValue()
