@@ -7,3 +7,6 @@
 
 # Bundled plugin
 *.zip
+
+# Vendored Ruby Plugin JAR
+/vendor
