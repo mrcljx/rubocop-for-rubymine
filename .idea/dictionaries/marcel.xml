@@ -2,6 +2,8 @@
   <dictionary name="marcel">
     <words>
       <w>rubocop</w>
+      <w>stderr</w>
+      <w>stdout</w>
     </words>
   </dictionary>
 </component>
