@@ -9,23 +9,22 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.roots.ProjectRootManager
-import java.io.File
 import com.intellij.openapi.project.ProjectLocator
-import java.io.IOException
-import java.util.LinkedList
 import java.io.InputStreamReader
 import io.github.sirlantis.rubymine.rubocop.model.RubocopResult
-import com.intellij.psi.impl.file.impl.FileManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
-import kotlin.modules.module
 import java.io.Closeable
 import java.io.BufferedInputStream
-import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.application.Application
 import kotlin.properties.Delegates
+import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
+import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
+import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
+import java.util.LinkedList
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.getProject(), "Running RuboCop", true) {
+
     var result: RubocopResult? = null
 
     val sdk: Sdk
@@ -62,6 +61,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         try {
             process = start.invoke()
         } catch (e: Exception) {
+            logger.warn("Failed to run RuboCop command", e)
             logger.error("Failed to run RuboCop command - is it (or bundler) installed? (SDK=%s)".format(sdkRoot), e)
             return
         }
@@ -75,63 +75,106 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         try {
             result = RubocopResult.readFromReader(stdoutReader)
         } catch (e: Exception) {
-            logger.error("Failed to parse RuboCop output.", e)
-
-            logger.error("ERROR", InputStreamReader(stderrStream).readText())
-
-            // reset stdout so we can print it again
-            stdoutStream.reset()
-            logger.error("OUTPUT", InputStreamReader(stdoutStream).readText())
+            logger.warn("Failed to parse RuboCop output", e)
+            logParseFailure(stderrStream, stdoutStream)
         }
+
+        var exited = false
 
         try {
             process.waitFor()
-
-            if (process.exitValue() != 0) {
-                logger.warn("RuboCop exited with %d".format(process.exitValue()))
-            }
+            exited = true
         } catch (e: Exception) {
-            logger.error("Interrupted while waiting for RuboCop.", e)
+            logger.error("Interrupted while waiting for RuboCop", e)
         }
 
         tryClose(stdoutStream)
         tryClose(stderrStream)
+
+        if (exited) {
+            when (process.exitValue()) {
+                0, 1 -> logger.warn("RuboCop exited with %d".format(process.exitValue()))
+                else -> logger.info("RuboCop exited with %d".format(process.exitValue()))
+            }
+        }
 
         if (result != null) {
             onComplete?.invoke(this)
         }
     }
 
-    fun runViaCommandLine() {
-        val commandLine = GeneralCommandLine()
-        commandLine.setWorkDirectory(workDirectory.getCanonicalPath())
+    private fun logParseFailure(stderrStream: BufferedInputStream, stdoutStream: BufferedInputStream) {
+        val stdout = readStreamToString(stdoutStream, true)
+        val stderr = readStreamToString(stderrStream)
 
-        val parts = LinkedList<String>()
+        logger.warn("=== RuboCop STDOUT START ===\n%s\n=== RuboCop STDOUT END ===".format(stdout))
+        logger.warn("=== RuboCop STDERR START ===\n%s\n=== RuboCop STDERR END ===".format(stderr))
 
-        // prefer rbenv over RVM
-        if (usesRubyVersionManager && !usesRbenv) {
-            val home = System.getProperty("user.home")
-            val rvmCommand = File(File(File(home, ".rvm"), "bin"), "rvm")
-            parts.addAll(array(rvmCommand.canonicalPath, ".", "do"))
-        }
+        val errorBuilder = StringBuilder("Please make sure that:")
+        errorBuilder.append("<ul>")
 
         if (usesBundler) {
-            parts.addAll(array("bundle", "exec"))
+            errorBuilder.append("<li>you added <code>gem 'rubocop'</code> to your <code>Gemfile</code></li>")
+            errorBuilder.append("<li>you did run <code>bundle install</code> successfully</li>")
+        } else {
+            errorBuilder.append("<li>you installed RuboCop for this Ruby version</li>")
         }
 
-        parts.addAll(array("rubocop", "--format", "json"))
-        parts.addAll(paths)
+        errorBuilder.append("<li>your RuboCop version isn't ancient</li>")
+        errorBuilder.append("</ul>")
 
-        var command = parts.removeFirst()
+        errorBuilder.append("<pre><code>")
+        errorBuilder.append(stderr)
+        errorBuilder.append("</code></pre>")
 
-        if (usesRbenv) {
-            command = File(rbenvShimsFolder, command).canonicalPath
+        NotifyUtil.notifyError(getProject(), "Failed to parse RuboCop output", errorBuilder.toString())
+    }
+
+    fun readStreamToString(stream: BufferedInputStream, reset: Boolean = false): String {
+        if (reset) {
+            try {
+                stream.reset()
+            } catch(e: Exception) {
+                logger.warn("Couldn't reset stream", e)
+                return ""
+            }
         }
 
-        commandLine.setExePath(command)
-        commandLine.addParameters(parts)
+        var result: String
 
-        logger.debug("Executing RuboCop", commandLine.getCommandLineString())
+        try {
+            result = InputStreamReader(stream).readText()
+        } catch (e: Exception) {
+            logger.warn("Couldn't read stream", e)
+            result = ""
+        }
+
+        return result
+    }
+
+    fun runViaCommandLine() {
+        val runner = RunnerUtil.getRunner(sdk, module)
+
+        val commandLineList = linkedListOf("rubocop", "--format", "json")
+        commandLineList.addAll(paths)
+
+        if (usesBundler) {
+            val bundler = BundlerUtil.getBundlerGem(sdk, module, true)
+            val bundleCommand = bundler.getFile().findChild("bin").findChild("bundle")
+            commandLineList.addAll(0, linkedListOf(bundleCommand.getCanonicalPath(), "exec"))
+        }
+
+        val command = commandLineList.removeFirst()
+        val args = commandLineList.copyToArray()
+
+        val commandLine = runner.createAndSetupCmdLine(workDirectory.getCanonicalPath(), null, true, command, sdk, *args)
+
+        if (usesBundler) {
+            val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
+            preprocessor.preprocess(commandLine)
+        }
+
+        logger.debug("Executing RuboCop (SDK=%s, Bundler=%b)".format(sdkRoot, usesBundler), commandLine.getCommandLineString())
 
         parseProcessOutput { commandLine.createProcess() }
     }
@@ -157,28 +200,6 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             return workDirectory.findChild("Gemfile") != null
         }
 
-    val usesRbenv: Boolean by Delegates.lazy {
-        // TODO: better check possible?
-        sdk.getHomePath().contains("rbenv")
-    }
-
-    val rbenvRoot: File by Delegates.lazy {
-        // TODO: prefer value from Settings panel
-        val versionFolder = File(sdk.getHomePath()).getParentFile().getParentFile()
-        versionFolder.getParentFile().getParentFile()
-    }
-
-    val rbenvShimsFolder: File by Delegates.lazy {
-        File(rbenvRoot, "shims")
-    }
-
-    val usesRubyVersionManager: Boolean by Delegates.lazy {
-        // TODO: better check possible?
-        sdk.getHomePath().contains("rvm")
-    }
-
-    val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml";
-
     val hasRubocopConfig: Boolean
         get() {
             return workDirectory.findChild(RUBOCOP_CONFIG_FILENAME) != null
@@ -198,6 +219,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
     class object {
         val logger = Logger.getInstance(RubocopBundle.LOG_ID)
+        val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml"
 
         fun isRubySdk(sdk: Sdk): Boolean {
             return sdk.getSdkType().getName() == "RUBY_SDK"

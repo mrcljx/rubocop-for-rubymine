@@ -7,19 +7,13 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.openapi.module.Module
 import io.github.sirlantis.rubymine.rubocop.model.FileResult
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.profile.codeInspection.InspectionProjectProfileManager
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.openapi.editor.Document
 import io.github.sirlantis.rubymine.rubocop.model.Offense
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.util.TextRange
-import kotlin.properties.Delegates
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.project.Project
 
 class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnotator.Result>() {
     class Input(val module: Module,
@@ -41,7 +35,7 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     }
 
     override fun collectInformation(file: PsiFile): Input? {
-       return collectInformation(file, null)
+        return collectInformation(file, null)
     }
 
     fun collectInformation(file: PsiFile, editor: Editor?): Input? {
@@ -143,6 +137,6 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     }
 
     class object {
-            val INSTANCE: RubocopAnnotator = RubocopAnnotator()
+        val INSTANCE: RubocopAnnotator = RubocopAnnotator()
     }
 }

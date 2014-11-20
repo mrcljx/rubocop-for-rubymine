@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonReader
 import java.io.FileReader
 import java.util.LinkedList
 
-class RubocopResult(val fileResults: List<FileResult>): List<FileResult> by fileResults {
+class RubocopResult(val fileResults: List<FileResult>) : List<FileResult> by fileResults {
 
     class object {
         fun readFromFile(file: VirtualFile): RubocopResult {

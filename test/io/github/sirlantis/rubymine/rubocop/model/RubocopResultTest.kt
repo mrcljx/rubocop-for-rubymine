@@ -1,14 +1,12 @@
 package io.github.sirlantis.rubymine.rubocop.model
 
 import org.junit.Test
-import java.io.StringReader
 import java.io.InputStreamReader
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.nio.CharBuffer
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import com.google.gson.stream.JsonReader
 import kotlin.test.assertEquals
 

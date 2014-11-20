@@ -10,7 +10,6 @@ import com.intellij.codeInspection.InspectionManager
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ExternalAnnotatorInspectionVisitor
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiElement
 import com.intellij.codeInspection.SuppressQuickFix

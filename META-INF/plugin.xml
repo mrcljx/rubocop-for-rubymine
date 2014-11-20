@@ -22,9 +22,11 @@
          on how to target different products -->
 
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true">org.jetbrains.plugins.ruby</depends>
+    <depends optional="true">com.intellij.modules.ruby</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <externalAnnotator language="ruby" implementationClass="io.github.sirlantis.rubymine.rubocop.RubocopAnnotator" />
+        <externalAnnotator language="ruby" implementationClass="io.github.sirlantis.rubymine.rubocop.RubocopAnnotator"/>
         <localInspection language="ruby" groupPath="Ruby" shortName="RubocopInspection"
                          enabledByDefault="true" level="ERROR"
                          bundle="io.github.sirlantis.rubymine.rubocop.RubocopBundle"

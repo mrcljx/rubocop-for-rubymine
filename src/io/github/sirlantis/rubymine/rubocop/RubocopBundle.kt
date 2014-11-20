@@ -1,7 +1,6 @@
 package io.github.sirlantis.rubymine.rubocop
 
 import com.intellij.CommonBundle
-import kotlin.properties.Delegates
 import java.lang.ref.Reference
 import java.util.ResourceBundle
 import java.lang.ref.SoftReference
