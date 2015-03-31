@@ -11,16 +11,16 @@
 - Restart the IDE
 - Wait a few seconds for the IDE to load and give Rubocop some time to inspect the current file.
 - Hover your mouse over highlighted issues to see the warning/error message.
+- You have to *save* a file to trigger re-validation of your file.
+
+### Troubleshooting
+
+- Make sure that you added a `rubocop.yml` to the root of your project.
+- If you use `bundler` you have to include `rubocop` in your `Gemfile`.
 
 ## Screenshot
 
 ![screenshot](https://cloud.githubusercontent.com/assets/56807/5009481/9bbee3b4-6a67-11e4-8bf9-2a32c3bc3d5e.png)
-
-## Troubleshooting
-
-- Make sure that you added a `rubocop.yml` to the root of your project.
-- You have to *save* a file to trigger re-validation of your file.
-- If you use `bundler` you have to include `rubocop` in your `Gemfile`.
 
 ## State of Development
 
