@@ -18,6 +18,13 @@
 - Make sure that you added a `rubocop.yml` to the root of your project.
 - If you use `bundler` you have to include `rubocop` in your `Gemfile`.
 
+### If it still doesn't work...
+
+- Open an [Issue](https://github.com/sirlantis/rubocop-for-rubymine/issues/new).
+- Provide the information asked for in [CONTRIBUTING](https://github.com/sirlantis/rubocop-for-rubymine/blob/master/CONTRIBUTING.md).
+
+**Important** I will happily merge pull-requests but can't and won't do free support.
+
 ## Screenshot
 
 ![screenshot](https://cloud.githubusercontent.com/assets/56807/5009481/9bbee3b4-6a67-11e4-8bf9-2a32c3bc3d5e.png)
