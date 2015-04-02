@@ -1,6 +1,6 @@
 # RuboCop for RubyMine
 
-> This is a simple RubyMine/IDEA plugin to allow using RuboCop as a linter in your ruby projects.
+> This is a simple RubyMine/IDEA plugin that integrates RuboCop as a linter for your Ruby projects.
 
 ## Installation
 
