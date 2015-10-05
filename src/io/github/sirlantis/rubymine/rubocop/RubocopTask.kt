@@ -169,6 +169,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             prepareBundler(commandLineList)
         }
 
+        commandLineList.add(0, "ruby")
         val command = commandLineList.removeFirst()
         val args = commandLineList.toTypedArray()
         val sudo = false
