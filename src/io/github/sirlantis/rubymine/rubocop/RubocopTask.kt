@@ -164,6 +164,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             commandLineList.addAll(0, linkedListOf(bundleCommand.getCanonicalPath(), "exec"))
         }
 
+        commandLineList.add(0, "ruby")
         val command = commandLineList.removeFirst()
         val args = commandLineList.copyToArray()
 
