@@ -15,7 +15,7 @@
 
 ### Troubleshooting
 
-- Make sure that you added a `rubocop.yml` to the root of your project.
+- Make sure that you added a `.rubocop.yml` to the root of your project.
 - If you use `bundler` you have to include `rubocop` in your `Gemfile`.
 
 ### If it still doesn't work...
