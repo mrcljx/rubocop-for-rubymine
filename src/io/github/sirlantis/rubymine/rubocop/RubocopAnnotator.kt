@@ -15,6 +15,10 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 
+fun clamp(min: Int, max: Int, value: Int): Int {
+    return Math.max(Math.min(value, max), min)
+}
+
 class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnotator.Result>() {
     class Input(val module: Module,
                 val file: PsiFile,
@@ -94,7 +98,7 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
                          severity: HighlightSeverity,
                          showErrorOnWholeLine: Boolean): Annotation {
 
-        val offenseLine = offense.location.line - 1
+        val offenseLine = clamp(0, document.lineCount - 1, offense.location.line - 1)
 
         val lineEndOffset = document.getLineEndOffset(offenseLine)
         val lineStartOffset = document.getLineStartOffset(offenseLine)
