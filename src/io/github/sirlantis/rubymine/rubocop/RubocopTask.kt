@@ -72,13 +72,15 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         }
 
         val bufferSize = 5 * 1024 * 1024
+
         val stdoutStream = BufferedInputStream(process.inputStream, bufferSize)
         val stdoutReader = InputStreamReader(stdoutStream)
 
         val stderrStream = BufferedInputStream(process.errorStream, bufferSize)
+        val stderrReader = InputStreamReader(stderrStream)
 
         try {
-            result = RubocopResult.readFromReader(stdoutReader)
+            result = RubocopResult.readFromReader(stdoutReader, stderrReader)
         } catch (e: Exception) {
             logger.warn("Failed to parse RuboCop output", e)
             logParseFailure(stderrStream, stdoutStream)
@@ -110,7 +112,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
     private fun logParseFailure(stderrStream: BufferedInputStream, stdoutStream: BufferedInputStream) {
         val stdout = readStreamToString(stdoutStream, true)
-        val stderr = readStreamToString(stderrStream)
+        val stderr = readStreamToString(stderrStream, true)
 
         logger.warn("=== RuboCop STDOUT START ===\n%s\n=== RuboCop STDOUT END ===".format(stdout))
         logger.warn("=== RuboCop STDERR START ===\n%s\n=== RuboCop STDERR END ===".format(stderr))

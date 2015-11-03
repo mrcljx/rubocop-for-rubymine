@@ -14,6 +14,8 @@ import io.github.sirlantis.rubymine.rubocop.model.Offense
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColorsScheme
+import com.intellij.openapi.project.Project
+import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 
 fun clamp(min: Int, max: Int, value: Int): Int {
     return Math.max(Math.min(value, max), min)
@@ -26,7 +28,8 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
                 val colorScheme: EditorColorsScheme?)
 
     class Result(val input: Input,
-                 val result: FileResult)
+                 val result: FileResult?,
+                 val warnings: List<String>?)
 
     val inspectionKey: HighlightDisplayKey by lazy {
         val id = "Rubocop"
@@ -67,17 +70,44 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     }
 
     override fun apply(file: PsiFile, annotationResult: Result?, holder: AnnotationHolder) {
+
         if (annotationResult == null) {
             return
         }
 
+        showWarnings(annotationResult)
+
+        val result = annotationResult.result ?: return
         val document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return
 
-        annotationResult.result.offenses.forEach { offense ->
+        result.offenses.forEach { offense ->
             val severity = severityForOffense(offense)
             createAnnotation(holder, document, offense, "RuboCop: ", severity, false)
             // TODO: offer fix option (at least suppress)
         }
+    }
+
+    fun showWarnings(result: Result) {
+        val warnings = result.warnings ?: return
+
+        if (warnings.isEmpty()) {
+            return
+        }
+
+        val message = buildString {
+            append("Some warnings were found while calling RuboCop:")
+            append("<ul>")
+
+            warnings.forEach { warning ->
+                append("<li>")
+                append(warning)
+                append("</li>")
+            }
+
+            append("</ul>")
+        }
+
+        NotifyUtil.notifyInfo(result.input.module.project, "RuboCop Warning", message)
     }
 
     fun severityForOffense(offense: Offense): HighlightSeverity {
@@ -126,9 +156,7 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
 
         task.run()
 
-        val fileResult = task.result?.fileResults?.firstOrNull() ?: return null
-
-        return Result(collectedInfo, fileResult)
+        return Result(collectedInfo, task.result?.fileResults?.firstOrNull(), task.result?.warnings)
     }
 
     companion object {

@@ -21,8 +21,8 @@ class RubocopResultTest {
         assertEquals(s, s.reader().readText())
     }
 
-    fun readFromString(s: String): RubocopResult {
-        return RubocopResult.readFromJsonReader(s.jsonReader())
+    fun readFromString(s: String, stderr: String? = null): RubocopResult {
+        return RubocopResult.readFromJsonReader(s.jsonReader(), stderr?.reader())
     }
 
     @Test fun testEmpty() {
@@ -33,6 +33,17 @@ class RubocopResultTest {
     @Test fun testWithoutEmptyFiles() {
         val result = readFromString("""{"files":[]}""")
         assertTrue(result.isEmpty())
+    }
+
+    @Test fun testWithConfigError() {
+        val result = readFromString("""{"files":[]}""", "Warning: unrecognized cop Style/CaseIndentation found in /project/.rubocop.yml")
+        assertEquals(1, result.warnings.count())
+        assertEquals("unrecognized cop Style/CaseIndentation found in /project/.rubocop.yml", result.warnings.first())
+    }
+
+    @Test fun testWithConfigErrors() {
+        val result = readFromString("""{"files":[]}""", "Warning: unrecognized cop Style/CaseIndentation found in /project/.rubocop.yml\nWarning: unrecognized foo\nWarning: unrecognized cop Whatever found in /somewhere/.rubocop.yml")
+        assertEquals(2, result.warnings.count())
     }
 
     @Test fun testWithFileWithoutOffenses() {
