@@ -169,9 +169,11 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             prepareBundler(commandLineList)
         }
 
-        // prepend ruby binary to the command
-        val rubyInterpreterExecutable = sdk.getHomePath();
-        commandLineList.add(0, rubyInterpreterExecutable)
+        val rubyInterpreterExecutable = sdk.homePath
+
+        if (rubyInterpreterExecutable != null) {
+            commandLineList.add(0, rubyInterpreterExecutable)
+        }
 
         val command = commandLineList.removeFirst()
         val args = commandLineList.toTypedArray()
