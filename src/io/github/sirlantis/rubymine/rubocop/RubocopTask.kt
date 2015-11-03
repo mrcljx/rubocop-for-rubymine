@@ -238,9 +238,10 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
     companion object {
         val logger = Logger.getInstance(RubocopBundle.LOG_ID)
         val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml"
+        val validSdkNames = listOf("RUBY_SDK", "JRUBY_SDK")
 
         fun isRubySdk(sdk: Sdk): Boolean {
-            return sdk.sdkType.name == "RUBY_SDK"
+            return validSdkNames.contains(sdk.sdkType.name)
         }
 
         fun getModuleForFile(project: Project, file: VirtualFile): Module? {
