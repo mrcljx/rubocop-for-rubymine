@@ -5,7 +5,7 @@ import java.util.LinkedList
 import java.util.HashMap
 
 class FileResult(val path: String, val offenses: List<Offense>) {
-    class object {
+    companion object {
         fun readFromJsonReader(reader: JsonReader): FileResult {
             val offenses = LinkedList<Offense>()
             var path: String? = null
@@ -35,8 +35,9 @@ class FileResult(val path: String, val offenses: List<Offense>) {
         }
     }
 
-    var offenseCache: Map<Number, List<Offense>>;
-    {
+    var offenseCache: Map<Number, List<Offense>>
+
+    init {
         val cache = HashMap<Number, LinkedList<Offense>>()
 
         for (offense in offenses) {

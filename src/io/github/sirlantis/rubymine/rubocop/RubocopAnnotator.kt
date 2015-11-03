@@ -24,10 +24,9 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     class Result(val input: Input,
                  val result: FileResult)
 
-    val inspectionKey: HighlightDisplayKey;
-    {
+    val inspectionKey: HighlightDisplayKey by lazy {
         val id = "Rubocop"
-        inspectionKey = HighlightDisplayKey.find(id) ?: HighlightDisplayKey(id, id)
+        HighlightDisplayKey.find(id) ?: HighlightDisplayKey(id, id)
     }
 
     override fun collectInformation(file: PsiFile, editor: Editor, hasErrors: Boolean): Input? {
@@ -39,28 +38,28 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
     }
 
     fun collectInformation(file: PsiFile, editor: Editor?): Input? {
-        if (file.getContext() != null || !isRubyFile(file)) {
+        if (file.context != null || !isRubyFile(file)) {
             return null
         }
 
-        val virtualFile = file.getVirtualFile()
+        val virtualFile = file.virtualFile
 
-        if (!virtualFile.isInLocalFileSystem()) {
+        if (!virtualFile.isInLocalFileSystem) {
             return null
         }
 
-        val project = file.getProject()
-        val module = RubocopTask.getModuleForFile(project, virtualFile)
-        val document = PsiDocumentManager.getInstance(project).getDocument(file)
+        val project = file.project
+        val module = RubocopTask.getModuleForFile(project, virtualFile) ?: return null
+        val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return null
 
         return Input(module,
                 file,
-                document.getText(),
-                editor?.getColorsScheme())
+                document.text,
+                editor?.colorsScheme)
     }
 
     fun isRubyFile(file: PsiFile): Boolean {
-        return file.getFileType().getName() == "Ruby"
+        return file.fileType.name == "Ruby"
     }
 
     override fun apply(file: PsiFile, annotationResult: Result?, holder: AnnotationHolder) {
@@ -68,13 +67,9 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
             return
         }
 
-        val document = PsiDocumentManager.getInstance(file.getProject()).getDocument(file)
+        val document = PsiDocumentManager.getInstance(file.project).getDocument(file) ?: return
 
-        if (document == null) {
-            return
-        }
-
-        for (offense in annotationResult.result.offenses) {
+        annotationResult.result.offenses.forEach { offense ->
             val severity = severityForOffense(offense)
             createAnnotation(holder, document, offense, "RuboCop: ", severity, false)
             // TODO: offer fix option (at least suppress)
@@ -123,20 +118,16 @@ class RubocopAnnotator : ExternalAnnotator<RubocopAnnotator.Input, RubocopAnnota
             return null
         }
 
-        val task = RubocopTask.forFiles(collectedInfo.module, collectedInfo.file.getVirtualFile())
+        val task = RubocopTask.forFiles(collectedInfo.module, collectedInfo.file.virtualFile)
 
         task.run()
 
-        val fileResult = task.result?.fileResults?.firstOrNull()
-
-        if (fileResult == null) {
-            return null
-        }
+        val fileResult = task.result?.fileResults?.firstOrNull() ?: return null
 
         return Result(collectedInfo, fileResult)
     }
 
-    class object {
+    companion object {
         val INSTANCE: RubocopAnnotator = RubocopAnnotator()
     }
 }

@@ -8,7 +8,7 @@ import java.util.LinkedList
 
 class RubocopResult(val fileResults: List<FileResult>) : List<FileResult> by fileResults {
 
-    class object {
+    companion object {
         fun readFromFile(file: VirtualFile): RubocopResult {
             return readFromReader(FileReader(file.getPath()))
         }
@@ -44,6 +44,6 @@ class RubocopResult(val fileResults: List<FileResult>) : List<FileResult> by fil
     }
 
     fun getFileResult(filePath: String): FileResult? {
-        return fileResults firstOrNull { it.path == filePath }
+        return fileResults.firstOrNull { it.path == filePath }
     }
 }

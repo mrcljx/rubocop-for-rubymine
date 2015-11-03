@@ -21,28 +21,34 @@ import kotlin.properties.Delegates
 import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
-import java.util.LinkedList
+import java.util.*
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.getProject(), "Running RuboCop", true) {
 
     var result: RubocopResult? = null
 
-    val sdk: Sdk
-    {
-        sdk = getSdkForModule(module)
+    val sdk: Sdk? by lazy {
+        val candidate = getSdkForModule(module) ?: null
+
+        if (candidate != null && isRubySdk(candidate)) {
+            candidate
+        } else {
+            null
+        }
     }
 
-    val sdkRoot: String
-        get() {
-            return sdk.getHomeDirectory().getParent().getCanonicalPath()
-        }
+    val sdkRoot: String? by lazy {
+        sdk?.homeDirectory?.parent?.canonicalPath
+    }
 
     override fun run(indicator: ProgressIndicator) {
         run()
     }
 
     fun run() {
-        if (!isRubySdk(sdk)) {
+        val localSdk = sdk ?: return
+
+        if (!isRubySdk(localSdk)) {
             logger.warn("Not a Ruby SDK")
             return
         }
@@ -52,7 +58,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             return
         }
 
-        runViaCommandLine()
+        runViaCommandLine(localSdk)
     }
 
     fun parseProcessOutput(start: () -> Process) {
@@ -67,10 +73,10 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         }
 
         val bufferSize = 5 * 1024 * 1024
-        val stdoutStream = BufferedInputStream(process.getInputStream(), bufferSize)
+        val stdoutStream = BufferedInputStream(process.inputStream, bufferSize)
         val stdoutReader = InputStreamReader(stdoutStream)
 
-        val stderrStream = BufferedInputStream(process.getErrorStream(), bufferSize)
+        val stderrStream = BufferedInputStream(process.errorStream, bufferSize)
 
         try {
             result = RubocopResult.readFromReader(stdoutReader)
@@ -152,38 +158,43 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         return result
     }
 
-    fun runViaCommandLine() {
+    fun runViaCommandLine(sdk: Sdk) {
         val runner = RunnerUtil.getRunner(sdk, module)
 
         val commandLineList = linkedListOf("rubocop", "--format", "json")
         commandLineList.addAll(paths)
 
         if (usesBundler) {
-            val bundler = BundlerUtil.getBundlerGem(sdk, module, true)
-            val bundleCommand = bundler.getFile().findChild("bin").findChild("bundle")
-            commandLineList.addAll(0, linkedListOf(bundleCommand.getCanonicalPath(), "exec"))
+            prepareBundler(commandLineList)
         }
 
         val command = commandLineList.removeFirst()
-        val args = commandLineList.copyToArray()
+        val args = commandLineList.toTypedArray()
+        val sudo = false
 
-        val commandLine = runner.createAndSetupCmdLine(workDirectory.getCanonicalPath(), null, true, command, sdk, *args)
+        val commandLine = runner.createAndSetupCmdLine(workDirectory.canonicalPath!!, null, true, command, sdk, sudo, *args)
 
         if (usesBundler) {
             val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
             preprocessor.preprocess(commandLine)
         }
 
-        logger.debug("Executing RuboCop (SDK=%s, Bundler=%b)".format(sdkRoot, usesBundler), commandLine.getCommandLineString())
+        logger.debug("Executing RuboCop (SDK=%s, Bundler=%b)".format(sdkRoot, usesBundler), commandLine.commandLineString)
 
         parseProcessOutput { commandLine.createProcess() }
     }
 
-    val app: Application by Delegates.lazy {
+    private fun prepareBundler(commandLineList: LinkedList<String>) {
+        val bundler = BundlerUtil.getBundlerGem(sdk, module, true) ?: return
+        val bundleCommand = bundler.file?.findChild("bin")?.findChild("bundle")?.canonicalPath ?: return
+        commandLineList.addAll(0, linkedListOf(bundleCommand, "exec"))
+    }
+
+    val app: Application by lazy {
         ApplicationManager.getApplication()
     }
 
-    val workDirectory: VirtualFile by Delegates.lazy {
+    val workDirectory: VirtualFile by lazy {
         var file: VirtualFile? = null
 
         app.runReadAction {
@@ -217,37 +228,49 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
     var onComplete: ((RubocopTask) -> Unit)? = null
 
-    class object {
+    companion object {
         val logger = Logger.getInstance(RubocopBundle.LOG_ID)
         val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml"
 
         fun isRubySdk(sdk: Sdk): Boolean {
-            return sdk.getSdkType().getName() == "RUBY_SDK"
+            return sdk.sdkType.name == "RUBY_SDK"
         }
 
-        fun getModuleForFile(project: Project, file: VirtualFile): Module {
-            return ProjectRootManager.getInstance(project).getFileIndex().getModuleForFile(file)
+        fun getModuleForFile(project: Project, file: VirtualFile): Module? {
+            return ProjectRootManager.getInstance(project).fileIndex.getModuleForFile(file)
         }
 
-        fun getFirstRubyModuleForProject(project: Project): Module {
-            val modules = ModuleManager.getInstance(project).getModules()
-            return modules first { isRubySdk(ModuleRootManager.getInstance(it).getSdk()) }
+        fun getFirstRubyModuleForProject(project: Project): Module? {
+            val modules = ModuleManager.getInstance(project).modules
+
+            return modules.firstOrNull {
+                val sdk = ModuleRootManager.getInstance(it).sdk
+                sdk != null && isRubySdk(sdk)
+            }
         }
 
-        fun getSdkForModule(module: Module): Sdk {
-            return ModuleRootManager.getInstance(module).getSdk()
+        fun getSdkForModule(module: Module): Sdk? {
+            return ModuleRootManager.getInstance(module).sdk
         }
 
-        fun forFiles(vararg files: VirtualFile): RubocopTask {
+        fun forFiles(vararg files: VirtualFile): RubocopTask? {
             kotlin.check(files.count() > 0) { "files must not be empty" }
-            val project = ProjectLocator.getInstance().guessProjectForFile(files.first())
-            val module = getModuleForFile(project, files.first())
+            val project = ProjectLocator.getInstance().guessProjectForFile(files.first()) ?: return null
+            val module = getModuleForFile(project, files.first()) ?: return null
             return forFiles(module, *files)
         }
 
         fun forFiles(module: Module, vararg files: VirtualFile): RubocopTask {
             kotlin.check(files.count() > 0) { "files must not be empty" }
-            val paths = files map { it.getCanonicalPath() }
+
+            val paths = files.flatMap {
+                if (it.canonicalPath != null) {
+                    listOf(it.canonicalPath!!)
+                } else {
+                    listOf()
+                }
+            }
+
             return RubocopTask(module, paths)
         }
 

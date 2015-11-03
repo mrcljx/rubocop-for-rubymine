@@ -3,7 +3,6 @@ package io.github.sirlantis.rubymine.rubocop.model
 import org.junit.Test
 import java.io.InputStreamReader
 import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
 import java.nio.CharBuffer
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
@@ -12,7 +11,7 @@ import kotlin.test.assertEquals
 
 class RubocopResultTest {
     fun toJsonReader(s: String): JsonReader {
-        val encoder = StandardCharsets.UTF_8.newEncoder()
+        val encoder = Charsets.UTF_8.newEncoder()
         val bytes = encoder.encode(CharBuffer.wrap(s.toCharArray()))
         val stream = ByteArrayInputStream(bytes.array())
         val reader = InputStreamReader(stream)
@@ -23,26 +22,26 @@ class RubocopResultTest {
         return RubocopResult.readFromJsonReader(toJsonReader(s))
     }
 
-    Test fun testEmpty() {
+    @Test fun testEmpty() {
         val result = readFromString("{}")
-        assertTrue(result.empty)
+        assertTrue(result.isEmpty())
     }
 
-    Test fun testWithoutEmptyFiles() {
+    @Test fun testWithoutEmptyFiles() {
         val result = readFromString("""{"files":[]}""")
-        assertTrue(result.empty)
+        assertTrue(result.isEmpty())
     }
 
-    Test fun testWithFileWithoutOffenses() {
+    @Test fun testWithFileWithoutOffenses() {
         val result = readFromString("""{"files":[{"path":"test.rb","offenses":[]}]}""")
-        assertFalse(result.empty)
+        assertFalse(result.isEmpty())
 
-        val file = result.first!!
+        val file = result.first()
         assertEquals(file.path, "test.rb")
-        assertTrue(file.offenses.empty)
+        assertTrue(file.offenses.isEmpty())
     }
 
-    Test fun testMultipleFiles() {
+    @Test fun testMultipleFiles() {
         val input = """
         {
             "metadata":{
@@ -92,11 +91,11 @@ class RubocopResultTest {
         """
 
         val result = readFromString(input)
-        assertFalse(result.empty)
+        assertFalse(result.isEmpty())
         assertEquals(result.size, 2)
     }
 
-    Test fun testOffense() {
+    @Test fun testOffense() {
         val offense = Offense.readFromJsonReader(toJsonReader("""{
             "severity":"convention",
             "message":"Prefer single-quoted strings when you don't need string interpolation or special symbols.",
@@ -113,7 +112,7 @@ class RubocopResultTest {
         assertEquals(offense.location.length, 11)
     }
 
-    Test fun testOffenseLocation() {
+    @Test fun testOffenseLocation() {
         val input = """{"line":42,"column":13,"length":"7"}"""
         val location = OffenseLocation.readFromJsonReader(toJsonReader(input))
         assertEquals(location.line, 42)

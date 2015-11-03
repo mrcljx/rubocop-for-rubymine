@@ -6,7 +6,7 @@ import java.util.ResourceBundle
 import java.lang.ref.SoftReference
 
 class RubocopBundle {
-    class object {
+    companion object {
         val BUNDLE: String = "io.github.sirlantis.rubymine.rubocop.RubocopBundle"
         val LOG_ID: String = "io.github.sirlantis.rubymine.rubocop"
 
@@ -25,7 +25,7 @@ class RubocopBundle {
                     ourBundle = SoftReference(bundle)
                 }
 
-                return bundle
+                return bundle!!
             }
     }
 }

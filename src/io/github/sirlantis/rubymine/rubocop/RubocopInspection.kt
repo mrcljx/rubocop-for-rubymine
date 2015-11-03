@@ -15,7 +15,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.codeInspection.SuppressQuickFix
 
 class RubocopInspection : LocalInspectionTool(), BatchSuppressableTool, UnfairLocalInspectionTool {
-    class object {
+    companion object {
         val INSPECTION_SHORT_NAME: String = "RubocopInspection"
         val KEY: Key<RubocopInspection> = Key.create(INSPECTION_SHORT_NAME)
         val LOG = Logger.getInstance(RubocopBundle.LOG_ID)
@@ -42,7 +42,7 @@ class RubocopInspection : LocalInspectionTool(), BatchSuppressableTool, UnfairLo
         return true
     }
 
-    override fun getBatchSuppressActions(element: PsiElement?): Array<out SuppressQuickFix>? {
-        return array()
+    override fun getBatchSuppressActions(element: PsiElement?): Array<out SuppressQuickFix> {
+        return arrayOf<SuppressQuickFix>()
     }
 }

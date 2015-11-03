@@ -3,7 +3,7 @@ package io.github.sirlantis.rubymine.rubocop.model
 import com.google.gson.stream.JsonReader
 
 class Offense(val severity: String, val cop: String, val message: String, val location: OffenseLocation) {
-    class object {
+    companion object {
         fun readFromJsonReader(reader: JsonReader): Offense {
             reader.beginObject()
             var location = OffenseLocation.zero()

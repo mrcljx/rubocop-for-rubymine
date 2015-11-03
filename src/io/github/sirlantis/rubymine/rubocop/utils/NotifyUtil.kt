@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowId
 
 class NotifyUtil {
-    class object {
+    companion object {
         private val TOOLWINDOW_NOTIFICATION = NotificationGroup.toolWindowGroup("RuboCop Errors", ToolWindowId.MESSAGES_WINDOW, true)
         private val STICKY_NOTIFICATION = NotificationGroup("RuboCop Errors", NotificationDisplayType.STICKY_BALLOON, true)
         private val BALLOON_NOTIFICATION = NotificationGroup("RuboCop Notifications", NotificationDisplayType.BALLOON, true)
