@@ -43,6 +43,6 @@ class RubocopInspection : LocalInspectionTool(), BatchSuppressableTool, UnfairLo
     }
 
     override fun getBatchSuppressActions(element: PsiElement?): Array<out SuppressQuickFix> {
-        return arrayOf<SuppressQuickFix>()
+        return arrayOf()
     }
 }

@@ -17,13 +17,12 @@ import com.intellij.openapi.module.Module
 import java.io.Closeable
 import java.io.BufferedInputStream
 import com.intellij.openapi.application.Application
-import kotlin.properties.Delegates
 import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
 import java.util.*
 
-class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.getProject(), "Running RuboCop", true) {
+class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.project, "Running RuboCop", true) {
 
     var result: RubocopResult? = null
 
@@ -133,7 +132,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         errorBuilder.append(stderr)
         errorBuilder.append("</code></pre>")
 
-        NotifyUtil.notifyError(getProject(), "Failed to parse RuboCop output", errorBuilder.toString())
+        NotifyUtil.notifyError(project, "Failed to parse RuboCop output", errorBuilder.toString())
     }
 
     fun readStreamToString(stream: BufferedInputStream, reset: Boolean = false): String {
@@ -198,7 +197,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         var file: VirtualFile? = null
 
         app.runReadAction {
-            val roots = ModuleRootManager.getInstance(module).getContentRoots()
+            val roots = ModuleRootManager.getInstance(module).contentRoots
             file = roots.first()
         }
 

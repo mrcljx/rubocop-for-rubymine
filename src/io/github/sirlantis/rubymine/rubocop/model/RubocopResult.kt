@@ -10,7 +10,7 @@ class RubocopResult(val fileResults: List<FileResult>) : List<FileResult> by fil
 
     companion object {
         fun readFromFile(file: VirtualFile): RubocopResult {
-            return readFromReader(FileReader(file.getPath()))
+            return readFromReader(FileReader(file.path))
         }
 
         fun readFromReader(reader: InputStreamReader): RubocopResult {

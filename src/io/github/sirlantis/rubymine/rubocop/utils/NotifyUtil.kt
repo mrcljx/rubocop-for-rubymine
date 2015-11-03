@@ -25,7 +25,7 @@ class NotifyUtil {
         }
 
         public fun notifyError(project: Project, title: String, exception: Exception) {
-            val message = exception.getMessage() ?: exception.javaClass.getCanonicalName()
+            val message = exception.message ?: exception.javaClass.canonicalName
             notify(NotificationType.ERROR, STICKY_NOTIFICATION, project, title, message)
         }
 
