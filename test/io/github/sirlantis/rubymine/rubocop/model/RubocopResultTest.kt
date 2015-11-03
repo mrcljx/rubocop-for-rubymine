@@ -2,24 +2,27 @@ package io.github.sirlantis.rubymine.rubocop.model
 
 import org.junit.Test
 import java.io.InputStreamReader
-import java.io.ByteArrayInputStream
-import java.nio.CharBuffer
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import com.google.gson.stream.JsonReader
 import kotlin.test.assertEquals
 
 class RubocopResultTest {
-    fun toJsonReader(s: String): JsonReader {
-        val encoder = Charsets.UTF_8.newEncoder()
-        val bytes = encoder.encode(CharBuffer.wrap(s.toCharArray()))
-        val stream = ByteArrayInputStream(bytes.array())
-        val reader = InputStreamReader(stream)
-        return JsonReader(reader)
+    fun String.reader(): InputStreamReader {
+        return InputStreamReader(byteInputStream())
+    }
+
+    fun String.jsonReader(): JsonReader {
+        return JsonReader(reader())
+    }
+
+    @Test fun testHelperFunctions() {
+        val s = "Hallo, ich hätte gerne ein Weißwurstbrötchen!"
+        assertEquals(s, s.reader().readText())
     }
 
     fun readFromString(s: String): RubocopResult {
-        return RubocopResult.readFromJsonReader(toJsonReader(s))
+        return RubocopResult.readFromJsonReader(s.jsonReader())
     }
 
     @Test fun testEmpty() {
@@ -96,13 +99,13 @@ class RubocopResultTest {
     }
 
     @Test fun testOffense() {
-        val offense = Offense.readFromJsonReader(toJsonReader("""{
+        val offense = Offense.readFromJsonReader("""{
             "severity":"convention",
             "message":"Prefer single-quoted strings when you don't need string interpolation or special symbols.",
             "cop_name":"Style/StringLiterals",
             "corrected":null,
             "location":{"line":5,"column":7,"length":11}}
-        """))
+        """.jsonReader())
 
         assertEquals(offense.severity, "convention")
         assertEquals(offense.message, "Prefer single-quoted strings when you don't need string interpolation or special symbols.")
@@ -114,7 +117,7 @@ class RubocopResultTest {
 
     @Test fun testOffenseLocation() {
         val input = """{"line":42,"column":13,"length":"7"}"""
-        val location = OffenseLocation.readFromJsonReader(toJsonReader(input))
+        val location = OffenseLocation.readFromJsonReader(input.jsonReader())
         assertEquals(location.line, 42)
         assertEquals(location.column, 13)
         assertEquals(location.length, 7)
