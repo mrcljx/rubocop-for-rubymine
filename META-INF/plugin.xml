@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
     <name>RuboCop</name>
-    <version>2.0.0.rc1</version>
+    <version>3.0.0</version>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
@@ -9,6 +9,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>3.0.0 Compatibility with IntelliJ IDEA 15 (RubyMine 8), JRuby, Windows, and other bug fixes</p>
         <p>2.0.0 Depend on Ruby plugin for CommandLine execution.</p>
         <p>1.0.1 Fix compatibility issues with rbenv.</p>
         <p>1.0.0 Fix compatibility issues with RVM.</p>
@@ -17,7 +18,7 @@
     ]]></change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="131"/>
+    <idea-version since-build="143"/>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
          on how to target different products -->
