@@ -165,13 +165,11 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         val commandLineList = linkedListOf("rubocop", "--format", "json")
         commandLineList.addAll(paths)
 
-        if (usesBundler) {
-            prepareBundler(commandLineList)
-        }
-
         val rubyInterpreterExecutable = sdk.homePath
 
-        if (rubyInterpreterExecutable != null) {
+        if (usesBundler) {
+            prepareBundler(commandLineList)
+        } else if (rubyInterpreterExecutable != null) {
             commandLineList.add(0, rubyInterpreterExecutable)
         }
 
@@ -185,6 +183,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
             preprocessor.preprocess(commandLine)
         }
+
 
         logger.debug("Executing RuboCop (SDK=%s, Bundler=%b)".format(sdkRoot, usesBundler), commandLine.commandLineString)
 
