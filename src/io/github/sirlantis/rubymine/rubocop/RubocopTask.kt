@@ -20,7 +20,6 @@ import com.intellij.openapi.application.Application
 import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
-import java.util.*
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.project, "Running RuboCop", true) {
 
@@ -67,7 +66,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             process = start.invoke()
         } catch (e: Exception) {
             logger.warn("Failed to run RuboCop command", e)
-            logger.error("Failed to run RuboCop command - is it (or bundler) installed? (SDK=%s)".format(sdkRoot), e)
+            logger.error("Failed to run RuboCop command - is it installed? (SDK=%s)".format(sdkRoot), e)
             return
         }
 
@@ -120,13 +119,8 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         val errorBuilder = StringBuilder("Please make sure that:")
         errorBuilder.append("<ul>")
 
-        if (usesBundler) {
-            errorBuilder.append("<li>you added <code>gem 'rubocop'</code> to your <code>Gemfile</code></li>")
-            errorBuilder.append("<li>you did run <code>bundle install</code> successfully</li>")
-        } else {
-            errorBuilder.append("<li>you installed RuboCop for this Ruby version</li>")
-        }
-
+        errorBuilder.append("<li>you installed RuboCop for this Ruby version</li>")
+        errorBuilder.append("<li>you did run <code>bundle install</code> successfully (if you use Bundler)</li>")
         errorBuilder.append("<li>your RuboCop version isn't ancient</li>")
         errorBuilder.append("</ul>")
 
@@ -165,35 +159,17 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         val commandLineList = linkedListOf("rubocop", "--format", "json")
         commandLineList.addAll(paths)
 
-        val rubyInterpreterExecutable = sdk.homePath
-
-        if (usesBundler) {
-            prepareBundler(commandLineList)
-        } else if (rubyInterpreterExecutable != null) {
-            commandLineList.add(0, rubyInterpreterExecutable)
-        }
-
         val command = commandLineList.removeFirst()
         val args = commandLineList.toTypedArray()
         val sudo = false
 
         val commandLine = runner.createAndSetupCmdLine(workDirectory.canonicalPath!!, null, true, command, sdk, sudo, *args)
+        val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
+        preprocessor.preprocess(commandLine)
 
-        if (usesBundler) {
-            val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
-            preprocessor.preprocess(commandLine)
-        }
-
-
-        logger.debug("Executing RuboCop (SDK=%s, Bundler=%b)".format(sdkRoot, usesBundler), commandLine.commandLineString)
+        logger.debug("Executing RuboCop (SDK=%s)".format(sdkRoot), commandLine.commandLineString)
 
         parseProcessOutput { commandLine.createProcess() }
-    }
-
-    private fun prepareBundler(commandLineList: LinkedList<String>) {
-        val bundler = BundlerUtil.getBundlerGem(sdk, module, true) ?: return
-        val bundleCommand = bundler.file?.findChild("bin")?.findChild("bundle")?.canonicalPath ?: return
-        commandLineList.addAll(0, linkedListOf(bundleCommand, "exec"))
     }
 
     val app: Application by lazy {
@@ -210,12 +186,6 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
         file as VirtualFile
     }
-
-    val usesBundler: Boolean
-        get() {
-            // TODO: better check possible?
-            return workDirectory.findChild("Gemfile") != null
-        }
 
     val hasRubocopConfig: Boolean
         get() {
