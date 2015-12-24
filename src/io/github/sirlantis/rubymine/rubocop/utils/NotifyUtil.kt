@@ -16,7 +16,7 @@ class NotifyUtil {
 
     companion object {
         private val TOOLWINDOW_NOTIFICATION = NotificationGroup.toolWindowGroup("RuboCop Errors", ToolWindowId.MESSAGES_WINDOW, true)
-        private val STICKY_NOTIFICATION = NotificationGroup("RuboCop Errors", NotificationDisplayType.STICKY_BALLOON, true)
+        private val STICKY_NOTIFICATION = NotificationGroup("Sticky RuboCop Errors", NotificationDisplayType.STICKY_BALLOON, true)
         private val BALLOON_NOTIFICATION = NotificationGroup("RuboCop Notifications", NotificationDisplayType.BALLOON, true)
         private val SHOWN_NOTIFICATIONS = hashMapOf<NotificationGroup, Notification>()
 
