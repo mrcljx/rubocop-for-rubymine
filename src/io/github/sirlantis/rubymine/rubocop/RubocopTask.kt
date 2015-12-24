@@ -142,7 +142,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             try {
                 stream.reset()
             } catch(e: Exception) {
-                logger.warn("Couldn't reset stream", e)
+                logger.debug("Couldn't reset stream - probably because it's empty", e)
                 return ""
             }
         }
