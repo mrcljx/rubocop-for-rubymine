@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>io.github.sirlantis.rubymine.rubocop</id>
     <name>RuboCop</name>
-    <version>3.0.1</version>
+    <version>3.1.0</version>
     <vendor email="marceljackwerth@gmail.com" url="http://twitter.com/sirlantis">Marcel Jackwerth</vendor>
 
     <description><![CDATA[
@@ -9,6 +9,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <p>3.1.0 Improved handling of bundler/rvm/rbenv and better rubocop-existence check.</p>
         <p>3.0.1 Fixes an issue where Bundler wouldn't execute as expected</p>
         <p>3.0.0 Compatibility with IntelliJ IDEA 15 (RubyMine 8), JRuby, Windows, and other bug fixes</p>
         <p>2.0.0 Depend on Ruby plugin for CommandLine execution.</p>
