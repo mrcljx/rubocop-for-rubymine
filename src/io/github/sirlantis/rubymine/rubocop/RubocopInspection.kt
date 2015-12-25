@@ -21,6 +21,9 @@ class RubocopInspection : LocalInspectionTool(), BatchSuppressableTool, UnfairLo
         val LOG = Logger.getInstance(RubocopBundle.LOG_ID)
     }
 
+    override fun getStaticDescription(): String? {
+        return "Uses RuboCop for linting.<br>Make sure Rubocop gem is installed.<br><br><b>Note:</b> Selected color doesn't have an effect!"
+    }
 
     override fun checkFile(file: PsiFile, manager: InspectionManager, isOnTheFly: Boolean): Array<out ProblemDescriptor>? {
         return ExternalAnnotatorInspectionVisitor.checkFileWithExternalAnnotator(file, manager, isOnTheFly, RubocopAnnotator.INSTANCE)

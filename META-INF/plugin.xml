@@ -34,7 +34,9 @@
                          enabledByDefault="true" level="ERROR"
                          bundle="io.github.sirlantis.rubymine.rubocop.RubocopBundle"
                          implementationClass="io.github.sirlantis.rubymine.rubocop.RubocopInspection"
-                         displayName="Rubocop" groupKey="rubcop.inspection.group.name"/>
+                         hasStaticDescription="true"
+                         displayName="Rubocop"
+                         groupKey="rubcop.inspection.group.name"/>
     </extensions>
 
     <application-components>
