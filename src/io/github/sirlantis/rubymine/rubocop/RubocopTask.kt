@@ -20,6 +20,7 @@ import com.intellij.openapi.application.Application
 import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
+import org.jetbrains.plugins.ruby.gem.util.GemSearchUtil
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.project, "Running RuboCop", true) {
 
@@ -51,8 +52,8 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             return
         }
 
-        if (!hasRubocopConfig) {
-            logger.warn("Didn't find $RUBOCOP_CONFIG_FILENAME")
+        if (GemSearchUtil.findGem(module, "rubocop") == null) {
+            logger.warn("Didn't find rubocop gem")
             return
         }
 
@@ -187,11 +188,6 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         file as VirtualFile
     }
 
-    val hasRubocopConfig: Boolean
-        get() {
-            return workDirectory.findChild(RUBOCOP_CONFIG_FILENAME) != null
-        }
-
     fun tryClose(closable: Closeable?) {
         if (closable != null) {
             try {
@@ -206,7 +202,6 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
 
     companion object {
         val logger = Logger.getInstance(RubocopBundle.LOG_ID)
-        val RUBOCOP_CONFIG_FILENAME: String = ".rubocop.yml"
         val validSdkNames = listOf("RUBY_SDK", "JRUBY_SDK")
 
         fun isRubySdk(sdk: Sdk): Boolean {
