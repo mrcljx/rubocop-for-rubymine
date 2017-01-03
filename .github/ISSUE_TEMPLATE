@@ -10,3 +10,7 @@ Follow instructions here: https://github.com/sirlantis/rubocop-for-rubymine/blob
 
 Operating System:
 RubyMine Version:
+
+# Quick Troubleshooting
+
+[ ] I launched RubyMine from the command-line (using `mine .`) to fully propagate `ENV`.
