@@ -13,4 +13,4 @@ RubyMine Version:
 
 ### Quick Troubleshooting
 
-* [ ] I launched RubyMine from the command-line (using `mine .`) to fully propagate `ENV`.
+- [ ] I launched RubyMine from the command-line (using `mine .`) to fully propagate `ENV`.
