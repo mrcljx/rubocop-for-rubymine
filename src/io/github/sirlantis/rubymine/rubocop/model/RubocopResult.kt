@@ -51,7 +51,7 @@ class RubocopResult(val fileResults: List<FileResult>, val warnings: List<String
 
             val pattern = Pattern.compile("Warning: (unrecognized cop .*)$", Pattern.MULTILINE)
             val matcher = pattern.matcher(stderrReader.readText())
-            val list = linkedListOf<String>()
+            val list = LinkedList<String>()
 
             while (matcher.find()) {
                 list.add(matcher.group(1)!!)
