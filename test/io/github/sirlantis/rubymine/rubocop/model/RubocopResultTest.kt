@@ -2,10 +2,8 @@ package io.github.sirlantis.rubymine.rubocop.model
 
 import org.junit.Test
 import java.io.InputStreamReader
-import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 import com.google.gson.stream.JsonReader
-import kotlin.test.assertEquals
+import org.junit.Assert.*
 
 class RubocopResultTest {
     fun String.reader(): InputStreamReader {

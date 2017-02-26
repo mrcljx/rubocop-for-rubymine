@@ -21,6 +21,7 @@ import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
 import org.jetbrains.plugins.ruby.gem.util.GemSearchUtil
+import java.util.*
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.project, "Running RuboCop", true) {
 
@@ -157,7 +158,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
     fun runViaCommandLine(sdk: Sdk) {
         val runner = RunnerUtil.getRunner(sdk, module)
 
-        val commandLineList = linkedListOf("rubocop", "--format", "json")
+        val commandLineList = LinkedList<String>(listOf("rubocop", "--format", "json"))
         commandLineList.addAll(paths)
 
         val command = commandLineList.removeFirst()
