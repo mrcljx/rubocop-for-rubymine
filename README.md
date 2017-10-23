@@ -1,3 +1,7 @@
+# DEPRECATED
+
+In the latest 2017 EAP release, [RubyMine finally supports RuboCop](https://blog.jetbrains.com/ruby/2017/01/rubymine-2017-1-eap-2-creating-gemsets-rubocop-support/).
+
 # RuboCop for RubyMine
 
 > This is a simple RubyMine/IDEA plugin that integrates RuboCop as a linter for your Ruby projects.
