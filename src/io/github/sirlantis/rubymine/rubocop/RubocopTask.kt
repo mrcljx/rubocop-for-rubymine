@@ -17,10 +17,13 @@ import com.intellij.openapi.module.Module
 import java.io.Closeable
 import java.io.BufferedInputStream
 import com.intellij.openapi.application.Application
+import com.intellij.openapi.util.SystemInfo
 import org.jetbrains.plugins.ruby.ruby.run.RunnerUtil
 import io.github.sirlantis.rubymine.rubocop.utils.NotifyUtil
+import org.jetbrains.plugins.ruby.gem.GemUtil
 import org.jetbrains.plugins.ruby.gem.util.BundlerUtil
 import org.jetbrains.plugins.ruby.gem.util.GemSearchUtil
+import org.jetbrains.plugins.ruby.ruby.sdk.RubySdkAdditionalData
 
 class RubocopTask(val module: Module, val paths: List<String>) : Task.Backgroundable(module.project, "Running RuboCop", true) {
 
@@ -40,6 +43,14 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
         sdk?.homeDirectory?.parent?.canonicalPath
     }
 
+    val installedInSdk: Boolean by lazy {
+        GemSearchUtil.findGem(sdk, "rubocop") != null
+    }
+
+    val installedInBundle: Boolean by lazy {
+        GemSearchUtil.findGem(module, "rubocop") != null
+    }
+
     override fun run(indicator: ProgressIndicator) {
         run()
     }
@@ -52,7 +63,7 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
             return
         }
 
-        if (GemSearchUtil.findGem(module, "rubocop") == null) {
+        if (!installedInSdk && !installedInBundle) {
             logger.warn("Didn't find rubocop gem")
             return
         }
@@ -157,16 +168,25 @@ class RubocopTask(val module: Module, val paths: List<String>) : Task.Background
     fun runViaCommandLine(sdk: Sdk) {
         val runner = RunnerUtil.getRunner(sdk, module)
 
-        val commandLineList = linkedListOf("rubocop", "--format", "json")
+        val rubocopPath = GemUtil.getGemExecutableRubyScriptPath(module, sdk, "rubocop",
+                "rubocop")!!
+        val commandLineList = linkedListOf(rubocopPath, "--format", "json")
         commandLineList.addAll(paths)
 
-        val command = commandLineList.removeFirst()
+        val command = if (SystemInfo.isWindows && sdk.sdkAdditionalData is RubySdkAdditionalData) {
+            (sdk.sdkAdditionalData as RubySdkAdditionalData).getInterpreterPath(sdk)
+        } else {
+            commandLineList.removeFirst()
+        }
         val args = commandLineList.toTypedArray()
         val sudo = false
 
         val commandLine = runner.createAndSetupCmdLine(workDirectory.canonicalPath!!, null, true, command, sdk, sudo, *args)
-        val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
-        preprocessor.preprocess(commandLine)
+
+        if (installedInBundle) {
+            val preprocessor = BundlerUtil.createBundlerPreprocessor(module, sdk)
+            preprocessor.preprocess(commandLine)
+        }
 
         logger.debug("Executing RuboCop (SDK=%s)".format(sdkRoot), commandLine.commandLineString)
 
